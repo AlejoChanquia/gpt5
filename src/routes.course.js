@@ -21,15 +21,19 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', authenticate, (req, res) => {
-  const { title, description, content } = req.body;
+  const { title, description, content, difficulty, estimated_time } = req.body;
   if (!title) return res.status(400).json({ error: 'Title required' });
+
   const safeTitle = sanitizeHtml(title);
   const safeDesc = sanitizeHtml(description || '');
   const safeContent = sanitizeHtml(content || '');
-  const stmt = db.prepare('INSERT INTO courses (title, description, content, author_id) VALUES (?, ?, ?, ?)');
-  stmt.run(safeTitle, safeDesc, safeContent, req.user.id, function(err) {
+  const safeDifficulty = sanitizeHtml(difficulty || '');
+  const safeTime = sanitizeHtml(estimated_time || '');
+
+  const stmt = db.prepare('INSERT INTO courses (title, description, content, difficulty, estimated_time, author_id) VALUES (?, ?, ?, ?, ?, ?)');
+  stmt.run(safeTitle, safeDesc, safeContent, safeDifficulty, safeTime, req.user.id, function(err) {
     if (err) return res.status(500).json({ error: 'Database error' });
-    return res.json({ id: this.lastID, title: safeTitle, description: safeDesc, content: safeContent });
+    return res.json({ id: this.lastID, title: safeTitle, description: safeDesc, content: safeContent, difficulty: safeDifficulty, estimated_time: safeTime });
   });
 });
 

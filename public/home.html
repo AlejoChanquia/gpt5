@@ -1,32 +1,33 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Home</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <title>Home - Course Platform</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body onload="requireAuth(); loadCourses(); document.getElementById('welcome').innerText = 'Hola ' + (user.name || '');">
-  <nav>
-    <a href="courses.html">Cursos</a>
-    <a href="profile.html">Perfil</a>
-    <a href="#" onclick="logout()">Salir</a>
-  </nav>
-  <div class="container">
-    <h2 id="welcome"></h2>
-    <section id="course-create">
-      <h3>Crear Curso</h3>
-      <input id="course-title" placeholder="Título" />
-      <input id="course-description" placeholder="Descripción" />
-      <textarea id="course-content" placeholder="Contenido"></textarea>
-      <button onclick="createCourse()">Crear</button>
-      <div id="course-result"></div>
-    </section>
-    <section>
-      <h3>Listado de Cursos</h3>
-      <input id="course-search" placeholder="Buscar cursos" oninput="searchCourses()" />
-      <ul id="courses"></ul>
-    </section>
-  </div>
-  <script src="script.js"></script>
+<body onload="requireAuth(); loadCourses();">
+    <nav>
+        <div>
+            <a href="home.html">Home</a>
+            <a href="courses.html">Create Course</a>
+            <a href="profile.html">Profile</a>
+        </div>
+        <button onclick="logout()">Logout</button>
+    </nav>
+
+    <div class="container">
+        <h1>Welcome, <span id="welcome-name"></span>!</h1>
+        <h2>Available Courses</h2>
+        <input type="text" id="course-search" placeholder="Search for courses..." onkeyup="searchCourses()">
+        <ul id="courses"></ul>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const welcomeName = document.getElementById('welcome-name');
+        if (welcomeName && user && user.name) {
+            welcomeName.innerText = user.name;
+        }
+    </script>
 </body>
 </html>

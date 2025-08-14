@@ -5,15 +5,24 @@
   <title>Cursos</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body onload="loadCourses()">
-  <nav>
-    <a href="home.html">Home</a>
-    <a href="index.html">Inicio</a>
-  </nav>
-  <div class="container">
-    <h2>Listado de Cursos</h2>
-    <ul id="courses"></ul>
-  </div>
-  <script src="script.js"></script>
+<body onload="requireAuth()">
+    <nav>
+        <div>
+            <a href="home.html">Home</a>
+            <a href="profile.html">Profile</a>
+        </div>
+        <button onclick="logout()">Logout</button>
+    </nav>
+    <div class="container">
+        <h2>Create a New Course</h2>
+        <input id="course-title" placeholder="Course Title" />
+        <textarea id="course-description" placeholder="Course Description"></textarea>
+        <textarea id="course-content" placeholder="Course Content (can include markdown)"></textarea>
+        <input id="course-difficulty" placeholder="Difficulty (e.g., Beginner, Intermediate, Advanced)" />
+        <input id="course-time" placeholder="Estimated Time (e.g., 2 hours)" />
+        <button onclick="createCourse()">Create Course</button>
+        <div id="course-result"></div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

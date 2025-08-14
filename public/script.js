@@ -6,10 +6,11 @@ async function register() {
   const name = document.getElementById('reg-name').value;
   const email = document.getElementById('reg-email').value;
   const password = document.getElementById('reg-pass').value;
+  const role = document.getElementById('reg-role').value;
   const res = await fetch('/api/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password })
+    body: JSON.stringify({ name, email, password, role })
   });
   const data = await res.json();
   const result = document.getElementById('reg-result');
@@ -29,7 +30,7 @@ async function login() {
   const result = document.getElementById('log-result');
   if (data.token) {
     token = data.token;
-    user = { name: data.name, email: data.email, preferences: data.preferences };
+    user = { id: data.id, name: data.name, email: data.email, role: data.role, preferences: data.preferences };
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     if (!user.preferences) {
@@ -48,20 +49,47 @@ function requireAuth() {
   }
 }
 
-function loadProfile() {
+async function loadProfile() {
   requireAuth();
-  const nameEl = document.getElementById('prof-name');
-  const emailEl = document.getElementById('prof-email');
-  const prefEl = document.getElementById('prof-pref');
-  if (nameEl) nameEl.innerText = user.name || '';
-  if (emailEl) emailEl.innerText = user.email || '';
-  if (prefEl) prefEl.innerText = user.preferences || '';
+  if (!user || !user.id) return;
+
+  const res = await fetch(`/api/users/${user.id}`);
+  const data = await res.json();
+
+  if (data.error) {
+    console.error(data.error);
+    return;
+  }
+
+  document.getElementById('prof-name').innerText = data.user.name;
+  document.getElementById('prof-email').innerText = data.user.email;
+  document.getElementById('prof-role').innerText = data.user.role;
+
+  const coursesList = document.getElementById('prof-courses');
+  coursesList.innerHTML = '';
+  if (data.courses && data.courses.length > 0) {
+    data.courses.forEach(course => {
+      const li = document.createElement('li');
+      li.innerText = `${course.title}`;
+      coursesList.appendChild(li);
+    });
+  } else {
+    coursesList.innerHTML = '<li>No courses created yet.</li>';
+  }
 }
 
 function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  window.location.href = 'index.html';
+  if (confirm('Are you sure you want to log out?')) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+  }
+}
+
+function redirectIfLoggedIn() {
+    if (token) {
+        window.location.href = 'home.html';
+    }
 }
 
 async function createCourse() {
@@ -69,17 +97,27 @@ async function createCourse() {
   const title = document.getElementById('course-title').value;
   const description = document.getElementById('course-description').value;
   const content = document.getElementById('course-content').value;
+  const difficulty = document.getElementById('course-difficulty').value;
+  const estimated_time = document.getElementById('course-time').value;
+
   const res = await fetch('/api/courses', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + token
     },
-    body: JSON.stringify({ title, description, content })
+    body: JSON.stringify({ title, description, content, difficulty, estimated_time })
   });
   const data = await res.json();
   const result = document.getElementById('course-result');
-  if (result) result.innerText = data.error ? data.error : 'Curso creado';
+  if (result) result.innerText = data.error ? data.error : 'Course created successfully!';
+  if (!data.error) {
+    document.getElementById('course-title').value = '';
+    document.getElementById('course-description').value = '';
+    document.getElementById('course-content').value = '';
+    document.getElementById('course-difficulty').value = '';
+    document.getElementById('course-time').value = '';
+  }
 }
 
 async function loadCourses(search = '') {
@@ -91,7 +129,11 @@ async function loadCourses(search = '') {
     list.innerHTML = '';
     data.forEach(c => {
       const li = document.createElement('li');
-      li.innerText = `${c.title} - ${c.author_name}`;
+      li.innerHTML = `
+        <strong>${c.title}</strong> by <a href="/user.html?id=${c.author_id}">${c.author_name}</a>
+        <p>${c.description}</p>
+        <small>Difficulty: ${c.difficulty || 'N/A'} | Estimated Time: ${c.estimated_time || 'N/A'}</small>
+      `;
       list.appendChild(li);
     });
   }
@@ -100,6 +142,35 @@ async function loadCourses(search = '') {
 function searchCourses() {
   const q = document.getElementById('course-search');
   loadCourses(q ? q.value : '');
+}
+
+async function loadPublicProfile() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('id');
+  if (!userId) return;
+
+  const res = await fetch(`/api/users/${userId}`);
+  const data = await res.json();
+
+  if (data.error) {
+    document.body.innerHTML = `<div class="container"><h1>User not found</h1></div>`;
+    return;
+  }
+
+  document.getElementById('user-name').innerText = data.user.name;
+  document.getElementById('user-role').innerText = data.user.role;
+
+  const coursesList = document.getElementById('user-courses');
+  coursesList.innerHTML = '';
+  if (data.courses && data.courses.length > 0) {
+    data.courses.forEach(course => {
+      const li = document.createElement('li');
+      li.innerText = course.title;
+      coursesList.appendChild(li);
+    });
+  } else {
+    coursesList.innerHTML = '<li>This user has not created any courses yet.</li>';
+  }
 }
 
 async function savePreferences() {
