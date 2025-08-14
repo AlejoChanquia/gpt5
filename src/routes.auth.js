@@ -1,27 +1,33 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const sanitizeHtml = require('sanitize-html');
+const validator = require('validator');
 const db = require('./db');
 const { SECRET, authenticate } = require('./middleware.auth');
 
 const router = express.Router();
 
 router.post('/register', (req, res) => {
-  const { name, email, password, role } = req.body;
-  if (!name || !email || !password || !role) {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) {
     return res.status(400).json({ error: 'Missing fields' });
   }
-  if (!['teacher', 'student'].includes(role)) {
-    return res.status(400).json({ error: 'Invalid role' });
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ error: 'Invalid email' });
+  }
+  if (!validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0 })) {
+    return res.status(400).json({ error: 'Weak password' });
   }
 
+  const safeName = sanitizeHtml(name);
   const hashed = bcrypt.hashSync(password, 10);
-  const stmt = db.prepare('INSERT INTO users (name, email, password, role, preferences) VALUES (?, ?, ?, ?, ?)');
-  stmt.run(name, email, hashed, role, null, function(err) {
+  const stmt = db.prepare('INSERT INTO users (name, email, password, preferences) VALUES (?, ?, ?, ?)');
+  stmt.run(safeName, email, hashed, null, function(err) {
     if (err) {
       return res.status(400).json({ error: 'Email already exists' });
     }
-    return res.json({ id: this.lastID, name, email, role, preferences: null });
+    return res.json({ id: this.lastID, name: safeName, email, role: 'user', preferences: null });
   });
 });
 

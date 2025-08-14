@@ -1,4 +1,5 @@
 const express = require('express');
+const sanitizeHtml = require('sanitize-html');
 const db = require('./db');
 const { authenticate } = require('./middleware.auth');
 
@@ -6,7 +7,7 @@ const router = express.Router();
 
 router.get('/', (req, res) => {
   const { search } = req.query;
-  let sql = 'SELECT courses.*, users.name as teacher_name FROM courses JOIN users ON courses.teacher_id = users.id';
+  let sql = 'SELECT courses.*, users.name as author_name FROM courses JOIN users ON courses.author_id = users.id';
   const params = [];
   if (search) {
     sql += ' WHERE courses.title LIKE ? OR courses.description LIKE ?';
@@ -20,13 +21,15 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', authenticate, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Only teachers can create courses' });
   const { title, description, content } = req.body;
   if (!title) return res.status(400).json({ error: 'Title required' });
-  const stmt = db.prepare('INSERT INTO courses (title, description, content, teacher_id) VALUES (?, ?, ?, ?)');
-  stmt.run(title, description || '', content || '', req.user.id, function(err) {
+  const safeTitle = sanitizeHtml(title);
+  const safeDesc = sanitizeHtml(description || '');
+  const safeContent = sanitizeHtml(content || '');
+  const stmt = db.prepare('INSERT INTO courses (title, description, content, author_id) VALUES (?, ?, ?, ?)');
+  stmt.run(safeTitle, safeDesc, safeContent, req.user.id, function(err) {
     if (err) return res.status(500).json({ error: 'Database error' });
-    return res.json({ id: this.lastID, title, description, content });
+    return res.json({ id: this.lastID, title: safeTitle, description: safeDesc, content: safeContent });
   });
 });
 

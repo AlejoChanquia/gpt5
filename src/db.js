@@ -7,20 +7,21 @@ db.serialize(() => {
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT NOT NULL CHECK(role IN ('teacher','student')),
+    role TEXT DEFAULT 'user',
     preferences TEXT
   )`);
 
-  // Ensure preferences column exists for older databases
+  // Ensure columns exist for older databases
   db.run('ALTER TABLE users ADD COLUMN preferences TEXT', () => {});
+  db.run("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'", () => {});
 
   db.run(`CREATE TABLE IF NOT EXISTS courses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     description TEXT,
     content TEXT,
-    teacher_id INTEGER NOT NULL,
-    FOREIGN KEY(teacher_id) REFERENCES users(id)
+    author_id INTEGER NOT NULL,
+    FOREIGN KEY(author_id) REFERENCES users(id)
   )`);
 });
 
