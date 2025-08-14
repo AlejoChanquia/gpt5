@@ -7,8 +7,12 @@ db.serialize(() => {
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT NOT NULL CHECK(role IN ('teacher','student'))
+    role TEXT NOT NULL CHECK(role IN ('teacher','student')),
+    preferences TEXT
   )`);
+
+  // Ensure preferences column exists for older databases
+  db.run('ALTER TABLE users ADD COLUMN preferences TEXT', () => {});
 
   db.run(`CREATE TABLE IF NOT EXISTS courses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

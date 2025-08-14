@@ -5,7 +5,15 @@ const { authenticate } = require('./middleware.auth');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  db.all('SELECT courses.*, users.name as teacher_name FROM courses JOIN users ON courses.teacher_id = users.id', [], (err, rows) => {
+  const { search } = req.query;
+  let sql = 'SELECT courses.*, users.name as teacher_name FROM courses JOIN users ON courses.teacher_id = users.id';
+  const params = [];
+  if (search) {
+    sql += ' WHERE courses.title LIKE ? OR courses.description LIKE ?';
+    const like = `%${search}%`;
+    params.push(like, like);
+  }
+  db.all(sql, params, (err, rows) => {
     if (err) return res.status(500).json({ error: 'Database error' });
     return res.json(rows);
   });
