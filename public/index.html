@@ -3,46 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>Plataforma Educativa</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Plataforma de Cursos</h1>
-
-  <section id="register">
-    <h2>Registro</h2>
-    <input id="reg-name" placeholder="Nombre" />
-    <input id="reg-email" placeholder="Email" />
-    <input id="reg-pass" placeholder="Contraseña" type="password" />
-    <select id="reg-role">
-      <option value="student">Estudiante</option>
-      <option value="teacher">Maestro</option>
-    </select>
-    <button onclick="register()">Registrarse</button>
-    <div id="reg-result"></div>
-  </section>
-
-  <section id="login">
-    <h2>Ingreso</h2>
-    <input id="log-email" placeholder="Email" />
-    <input id="log-pass" placeholder="Contraseña" type="password" />
-    <button onclick="login()">Ingresar</button>
-    <div id="log-result"></div>
-  </section>
-
-  <section id="course-create">
-    <h2>Crear Curso (Maestros)</h2>
-    <input id="course-title" placeholder="Título" />
-    <input id="course-description" placeholder="Descripción" />
-    <textarea id="course-content" placeholder="Contenido"></textarea>
-    <button onclick="createCourse()">Crear</button>
-    <div id="course-result"></div>
-  </section>
-
-  <section>
-    <h2>Listado de Cursos</h2>
-    <button onclick="loadCourses()">Cargar Cursos</button>
-    <ul id="courses"></ul>
-  </section>
-
-  <script src="script.js"></script>
+  <nav>
+    <a href="login.html">Ingresar</a>
+    <a href="register.html">Registrarse</a>
+    <a href="courses.html">Cursos</a>
+  </nav>
+  <div class="container">
+    <h1>Bienvenido a la Plataforma de Cursos</h1>
+    <p>Explora contenido creado por la comunidad y comparte tus conocimientos.</p>
+  </div>
 </body>
 </html>

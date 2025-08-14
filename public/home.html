@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Home</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body onload="requireAuth(); loadCourses(); document.getElementById('welcome').innerText = 'Hola ' + (user.name || ''); if(user.role !== 'teacher'){document.getElementById('course-create').style.display='none';}">
+  <nav>
+    <a href="courses.html">Cursos</a>
+    <a href="profile.html">Perfil</a>
+    <a href="#" onclick="logout()">Salir</a>
+  </nav>
+  <div class="container">
+    <h2 id="welcome"></h2>
+    <section id="course-create">
+      <h3>Crear Curso (Maestros)</h3>
+      <input id="course-title" placeholder="Título" />
+      <input id="course-description" placeholder="Descripción" />
+      <textarea id="course-content" placeholder="Contenido"></textarea>
+      <button onclick="createCourse()">Crear</button>
+      <div id="course-result"></div>
+    </section>
+    <section>
+      <h3>Listado de Cursos</h3>
+      <ul id="courses"></ul>
+    </section>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
