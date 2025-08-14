@@ -9,13 +9,14 @@ const { SECRET, authenticate } = require('./middleware.auth');
 const router = express.Router();
 
 router.post('/register', (req, res) => {
-  const { name, email, password, role } = req.body;
-  if (!name || !email || !password || !role) {
+  let { name, email, password, role } = req.body;
+  if (!name || !email || !password) {
     return res.status(400).json({ error: 'Missing fields' });
   }
-  if (role !== 'student' && role !== 'teacher') {
+  if (role && role !== 'student' && role !== 'teacher') {
     return res.status(400).json({ error: 'Invalid role' });
   }
+  if (!role) role = 'student';
   if (!validator.isEmail(email)) {
     return res.status(400).json({ error: 'Invalid email' });
   }
