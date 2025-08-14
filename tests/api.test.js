@@ -12,21 +12,20 @@ describe('API', () => {
 
   let token = '';
 
-  test('register teacher', async () => {
+  test('register user', async () => {
     const res = await request(app).post('/api/register').send({
       name: 'Prof',
       email: 'prof@example.com',
-      password: 'pass',
-      role: 'teacher'
+      password: 'StrongP4ssw0rd'
     });
     expect(res.status).toBe(200);
     expect(res.body.email).toBe('prof@example.com');
   });
 
-  test('login teacher', async () => {
+  test('login user', async () => {
     const res = await request(app).post('/api/login').send({
       email: 'prof@example.com',
-      password: 'pass'
+      password: 'StrongP4ssw0rd'
     });
     expect(res.status).toBe(200);
     expect(res.body.token).toBeDefined();
@@ -67,7 +66,7 @@ describe('API', () => {
   test('login returns preferences', async () => {
     const res = await request(app).post('/api/login').send({
       email: 'prof@example.com',
-      password: 'pass'
+      password: 'StrongP4ssw0rd'
     });
     expect(res.status).toBe(200);
     expect(res.body.preferences).toBe('math');

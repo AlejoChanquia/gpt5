@@ -6,11 +6,10 @@ async function register() {
   const name = document.getElementById('reg-name').value;
   const email = document.getElementById('reg-email').value;
   const password = document.getElementById('reg-pass').value;
-  const role = document.getElementById('reg-role').value;
   const res = await fetch('/api/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password, role })
+    body: JSON.stringify({ name, email, password })
   });
   const data = await res.json();
   const result = document.getElementById('reg-result');
@@ -30,7 +29,7 @@ async function login() {
   const result = document.getElementById('log-result');
   if (data.token) {
     token = data.token;
-    user = { name: data.name, email: data.email, role: data.role, preferences: data.preferences };
+    user = { name: data.name, email: data.email, preferences: data.preferences };
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     if (!user.preferences) {
@@ -53,11 +52,9 @@ function loadProfile() {
   requireAuth();
   const nameEl = document.getElementById('prof-name');
   const emailEl = document.getElementById('prof-email');
-  const roleEl = document.getElementById('prof-role');
   const prefEl = document.getElementById('prof-pref');
   if (nameEl) nameEl.innerText = user.name || '';
   if (emailEl) emailEl.innerText = user.email || '';
-  if (roleEl) roleEl.innerText = user.role || '';
   if (prefEl) prefEl.innerText = user.preferences || '';
 }
 
@@ -94,7 +91,7 @@ async function loadCourses(search = '') {
     list.innerHTML = '';
     data.forEach(c => {
       const li = document.createElement('li');
-      li.innerText = `${c.title} - ${c.teacher_name}`;
+      li.innerText = `${c.title} - ${c.author_name}`;
       list.appendChild(li);
     });
   }
