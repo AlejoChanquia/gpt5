@@ -30,10 +30,14 @@ async function login() {
   const result = document.getElementById('log-result');
   if (data.token) {
     token = data.token;
-    user = { name: data.name, email: data.email, role: data.role };
+    user = { name: data.name, email: data.email, role: data.role, preferences: data.preferences };
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
-    window.location.href = 'home.html';
+    if (!user.preferences) {
+      window.location.href = 'setup.html';
+    } else {
+      window.location.href = 'home.html';
+    }
   } else if (result) {
     result.innerText = data.error || 'Error de login';
   }
@@ -50,9 +54,11 @@ function loadProfile() {
   const nameEl = document.getElementById('prof-name');
   const emailEl = document.getElementById('prof-email');
   const roleEl = document.getElementById('prof-role');
+  const prefEl = document.getElementById('prof-pref');
   if (nameEl) nameEl.innerText = user.name || '';
   if (emailEl) emailEl.innerText = user.email || '';
   if (roleEl) roleEl.innerText = user.role || '';
+  if (prefEl) prefEl.innerText = user.preferences || '';
 }
 
 function logout() {
@@ -79,8 +85,9 @@ async function createCourse() {
   if (result) result.innerText = data.error ? data.error : 'Curso creado';
 }
 
-async function loadCourses() {
-  const res = await fetch('/api/courses');
+async function loadCourses(search = '') {
+  const url = search ? '/api/courses?search=' + encodeURIComponent(search) : '/api/courses';
+  const res = await fetch(url);
   const data = await res.json();
   const list = document.getElementById('courses');
   if (list) {
@@ -90,5 +97,31 @@ async function loadCourses() {
       li.innerText = `${c.title} - ${c.teacher_name}`;
       list.appendChild(li);
     });
+  }
+}
+
+function searchCourses() {
+  const q = document.getElementById('course-search');
+  loadCourses(q ? q.value : '');
+}
+
+async function savePreferences() {
+  requireAuth();
+  const prefs = document.getElementById('pref-input').value;
+  const res = await fetch('/api/preferences', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify({ preferences: prefs })
+  });
+  const data = await res.json();
+  const result = document.getElementById('pref-result');
+  if (result) result.innerText = data.error ? data.error : 'Preferencias guardadas';
+  if (!data.error) {
+    user.preferences = prefs;
+    localStorage.setItem('user', JSON.stringify(user));
+    window.location.href = 'home.html';
   }
 }

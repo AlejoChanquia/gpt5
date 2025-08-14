@@ -31,6 +31,7 @@ describe('API', () => {
     expect(res.status).toBe(200);
     expect(res.body.token).toBeDefined();
     token = res.body.token;
+    expect(res.body.preferences).toBeNull();
   });
 
   test('create course', async () => {
@@ -46,5 +47,29 @@ describe('API', () => {
     const res = await request(app).get('/api/courses');
     expect(res.status).toBe(200);
     expect(res.body.length).toBeGreaterThan(0);
+  });
+
+  test('search courses', async () => {
+    const res = await request(app).get('/api/courses?search=Mate');
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBe(1);
+    expect(res.body[0].title).toBe('Matemáticas');
+  });
+
+  test('set preferences', async () => {
+    const res = await request(app)
+      .put('/api/preferences')
+      .set('Authorization', 'Bearer ' + token)
+      .send({ preferences: 'math' });
+    expect(res.status).toBe(200);
+  });
+
+  test('login returns preferences', async () => {
+    const res = await request(app).post('/api/login').send({
+      email: 'prof@example.com',
+      password: 'pass'
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.preferences).toBe('math');
   });
 });
